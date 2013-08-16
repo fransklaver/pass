@@ -13,6 +13,8 @@ GPG_OPTS="--quiet --yes --batch"
 export GIT_DIR
 export GIT_WORK_TREE="${PASSWORD_STORE_GIT:-$PREFIX}"
 
+CLIPBOARD=primary
+
 version() {
 	cat <<_EOF
 |-----------------------|
@@ -85,11 +87,11 @@ clip() {
 	# in shell. There must be a better way to deal with this, but because I'm a dolt,
 	# we're going with this for now.
 
-	before="$(xclip -o -selection clipboard | base64)"
-	echo -n "$1" | xclip -selection clipboard
+	before="$(xclip -o -selection $CLIPBOARD | base64)"
+	echo -n "$1" | xclip -selection $CLIPBOARD
 	(
 		sleep 45
-		now="$(xclip -o -selection clipboard | base64)"
+		now="$(xclip -o -selection $CLIPBOARD | base64)"
 		if [[ $now != $(echo -n "$1" | base64) ]]; then
 			before="$now"
 		fi
@@ -103,7 +105,7 @@ clip() {
 		# so we axe it here:
 		qdbus org.kde.klipper /klipper org.kde.klipper.klipper.clearClipboardHistory &>/dev/null
 
-		echo "$before" | base64 -d | xclip -selection clipboard
+		echo "$before" | base64 -d | xclip -selection $CLIPBOARD
 	) & disown
 	echo "Copied $2 to clipboard. Will clear in 45 seconds."
 }
